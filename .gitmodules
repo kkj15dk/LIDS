@@ -1,0 +1,6 @@
+[submodule "progen"]
+	path = progen
+	url = https://github.com/salesforce/progen
+[submodule "lock_gp"]
+	path = lock_gp
+	url = https://github.com/generatebio/lock_gp

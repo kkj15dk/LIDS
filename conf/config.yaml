@@ -1,0 +1,178 @@
+# Where to save outputs and continue from.
+project_path: outputs/default
+round: 1
+theta_path: null # path to theta samples. If set to null, will run MCMC to get theta samples, or reuse existing ones if present in project_path.
+
+simulation:
+  theta_index: 0 # index within the held-out test split used by main.py when creating project_path/true_theta.npz
+  observation_output_name: observation_block.npz
+
+# Batch size parameters
+seed: 42
+device: cuda
+batch_size: 512
+batch_size_eval: 512
+
+# Theta distribution parameters
+num_samples_prior: 100_000 # for the first round of training.
+num_samples_train: 100_000
+num_samples_eval: 512
+posterior_approximation: mcmc # mcmc | variational
+
+# MCMC parameters
+num_warmup_mcmc: 2000
+num_chains_mcmc: 8
+mcmc_chain_method: auto # auto | parallel | vectorized | sequential
+mcmc_target_accept_prob: 0.8
+mcmc_max_tree_depth: 10
+mcmc_dense_mass: false
+mcmc_write_diagnostics: true
+mcmc_diagnostics_include_ess: true
+mcmc_svi_fallback_rhat_threshold: 2 # Threshold to switch to SVI from NUTS
+
+# SVI parameters
+num_svi_steps: 200000
+svi_learning_rate: 0.001
+svi_lr_min_fraction: 0.0
+svi_warmup_frac: 0.02
+svi_num_particles: 64
+svi_grad_clip_ratio: 0.1
+svi_adam_eps: 1e-6
+svi_adam_update_clip: 3.0
+svi_guide_init_scale: 0.01
+svi_check_every: 1000
+svi_patience: 0
+svi_min_delta: 0.0
+
+# Variational synthesis model
+sequence_length: 5
+num_experiments: 96
+num_syntheses: 96
+initialize_syntheses_per_experiment: true
+freeze_experiment_weights: false
+# vocabulary: [A, T, C, G]
+vocabulary: [A, C, D, E, F, G, H, I, K, L, M, N, P, Q, R, S, T, V, W, Y]
+tau_warmup_steps: 0
+
+# Noise parameters
+sigma: 0.0001
+sigma_zero_warmup: 0
+sigma_warmup: 0
+
+# q-misspecification
+q_misspec_rho: 0.0
+
+# Variational distribution
+acquisition_function: lifted # lifted | thompson | argmax_lifted | gp_acqf
+
+gp: # only used when acquisition_function=gp_acqf
+  kernel: hamming # hamming | lock
+  acquisition: log_expected_improvement # acquisition function
+  num_restarts: 20
+  raw_samples: 4096
+  max_batch_size: 512
+  max_train_points: 9600
+
+model_type: categorical
+model_hidden_dim: 64
+num_heads: 2 # 4
+num_layers: 2 # 4
+mlp_ratio: 3
+dropout: 0.1
+use_rope: false
+use_pos_embed: true
+
+# Fitness function parameters
+overlap_reg_strength: 1
+num_components: 10
+weights: # p(w)
+  mode: shifted_gamma # fixed | gamma | shifted_gamma
+  value: 1.0
+  gamma_concentration: 1
+  gamma_rate: 1
+
+oracle: # Which oracle to test against
+  type: plm # bump | plm
+  
+  # PLM specific - rubisco (first 100 aas)
+  wt_str: 1MASSILSSAVVASVNSASPAQASMVAPFTGLKSSAGFPITRKNNVDITTLASNGGKVQCMKVWPPLGLRKFETLSYLPDMSNEQLSKECDYLLRNGWVPC
+  beta: 1.0
+  num_samples: 8192 # total local sample budget per experiment to approximate <f, q_e> by defensive importance sampling.
+  batch_size: 512
+  return_diagnostics: true # return importance weight diagnostics.
+  defensive_alpha: 0.5 # defensive mixture distribution
+  # PLM specific
+
+  # sparse specific
+  # OBS bump function abolishes activity for any double mutation from the optimum.
+  num_components: 1
+  weights: # p(w)
+    mode: fixed # fixed | gamma | shifted_gamma
+    value: 1.0
+    gamma_concentration: 1
+    gamma_rate: 1
+  # sparse specific
+
+# Epochs and logging - every step
+num_epochs: 300
+diagnostic_every: 500
+
+# Evaluation metrics - every epoch
+log_every: 1
+eval_every: 100
+top_k_every: 200
+visualize_every: 200
+num_visualized_syntheses: 1 # only plot the first this-many syntheses/experiments
+early_stopping_patience: 0 # It seems best to just set this to 0 and let it run to completion. Rely on having a small enough variational distribution to not overfit
+early_stopping_min_delta: 0.0
+k_for_top_k: 5
+beam_width_for_top_k: 10
+beam_chunk_size: 32
+
+# UMAP visualization
+do_visualization: true
+use_umap_eval: false
+deduplicate_samples_for_umap: true
+umap_every: 10
+umap_num_x_0_samples: 100000
+recompute_umap: false
+umap_together: false
+umap_num_q_samples_per_experiment: 10000
+umap_n_neighbors: 30
+umap_min_dist: 0.1
+umap_simulated_true: true
+umap_color_divergences: true
+num_samples_simulation: 10000
+
+# Optimizer
+optimizer_name: AdamW
+momentum: 0.9
+learning_rate: 0.001
+synthesis_lr_scale: 1.0
+lr_warmup_steps: 10000
+weight_decay: 1e-5
+synthesis_weight_decay: 1e-5
+clip_grad_value: null
+
+# Mixed precision
+dtype: bf16 # bf16 | fp16
+
+# PyTorch profiler
+enable_torch_profiler: false
+profiler_wait_steps: 1000
+profiler_warmup_steps: 1000
+profiler_active_steps: 10
+profiler_repeat: 2
+profiler_record_shapes: true
+profiler_profile_memory: true
+profiler_with_stack: false
+
+# WandB
+use_wandb: false
+wandb_entity: null # your wandb entity (null = default entity of the API key)
+wandb_project: your_project_name
+wandb_secret_file: secret.txt
+
+hydra:
+  run:
+    dir: ${project_path}/round_${round}_train

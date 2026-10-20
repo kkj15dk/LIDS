@@ -1,0 +1,17 @@
+# cache files
+__pycache__/
+
+# environment
+.venv/
+
+# API key
+secret.txt
+
+# wandb
+wandb/
+
+# outputs
+outputs/
+
+# progen2 weights
+progen2-base/*
