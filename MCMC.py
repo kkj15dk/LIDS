@@ -569,7 +569,6 @@ def model(N: int,
         raise ValueError(f"gamma must be a float, int, or numpyro Distribution instance, got {type(gamma)}")
 
     # log_u sampling
-    # Ordered for label-switching of the N! relabelings.
     log_u = numpyro.sample(
         'alpha',
         dist.TransformedDistribution(
@@ -589,7 +588,6 @@ def model(N: int,
     # Exponential for sparse regression
     logits = numpyro.sample(
         'logits',
-        # dist.HalfCauchy(2.0).expand((N, L, K))
         dist.Exponential(0.5).expand((N, L, K))
     )
     # For numerical stability
