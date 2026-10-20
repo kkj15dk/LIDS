@@ -2,6 +2,8 @@
 
 Code for reproducing results in the paper: [Information-Dense Synthesis for Molecular Discovery](https://doi.org/10.48550/arXiv.2610.08495)
 
+![Information-dense synthesis uses mixtures of molecules q, instead of single molecules x. By testing the mixtures as a pool, we encode the activity from many molecules into experiment outcomes y. Compared to individual synthesis, this can carry much more information about the optimal molecule, especially on sparse molecule-activity maps](overview3-1.png)
+
 ## Installation
 
 You can clone this repository by running:
